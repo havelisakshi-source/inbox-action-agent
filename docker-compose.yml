@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: inbox-pg
+    environment:
+      POSTGRES_USER: inbox
+      POSTGRES_PASSWORD: inbox
+      POSTGRES_DB: inbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - inbox-pg-data:/var/lib/postgresql/data
+
+volumes:
+  inbox-pg-data:
