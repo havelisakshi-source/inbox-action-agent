@@ -3,11 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, system, inbox, agent
+from app.api import auth, system, inbox, agent, actions, analytics, tasks, history
 from app.core.config import settings
 from app.core.error_handlers import register_exception_handlers
 from app.core.logging import configure_logging, get_logger
-from app.api import auth, system, inbox, agent, actions, analytics, tasks # <-- Add actions
 
 
 @asynccontextmanager
@@ -35,7 +34,6 @@ def create_app() -> FastAPI:
     )
     register_exception_handlers(app)
 
-    # Register Routers
     app.include_router(system.router, prefix="/api", tags=["system"])
     app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
     app.include_router(inbox.router, prefix="/api/inbox", tags=["inbox"])
@@ -43,6 +41,8 @@ def create_app() -> FastAPI:
     app.include_router(actions.router, prefix="/api/actions", tags=["actions"])
     app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
     app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
+    app.include_router(history.router, prefix="/api/history", tags=["history"])
+
     return app
 
 

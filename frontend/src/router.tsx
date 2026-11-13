@@ -7,10 +7,12 @@ import { Dashboard } from './pages/Dashboard';
 import { Inbox } from './pages/Inbox';
 import { Important } from './pages/Important';
 import { Unread } from './pages/Unread';
+import { Followups } from './pages/Followups';
+import { ActionCenter } from './pages/ActionCenter';
+import { History } from './pages/History';
 import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { Assistant } from './pages/Assistant';
-import { Placeholder } from './pages/Placeholder';
 import { Tasks } from './pages/Tasks';
 
 export const router = createBrowserRouter([
@@ -22,14 +24,13 @@ export const router = createBrowserRouter([
       { path: 'inbox', element: <Inbox /> },
       { path: 'important', element: <Important /> },
       { path: 'unread', element: <Unread /> },
-      { path: 'followups', element: <Placeholder title="Follow-ups" /> },
+      { path: 'followups', element: <Followups /> },
       { path: 'assistant', element: <Assistant /> },
-      { path: 'actions', element: <Placeholder title="Action Center" /> },
-      { path: 'tasks', element: <Placeholder title="Tasks & Deadlines" /> },
-      { path: 'analytics', element: <Analytics /> },
-      { path: 'history', element: <Placeholder title="Activity History" /> },
-      { path: 'settings', element: <Settings /> },
+      { path: 'actions', element: <ActionCenter /> },
       { path: 'tasks', element: <Tasks /> },
+      { path: 'analytics', element: <Analytics /> },
+      { path: 'history', element: <History /> },
+      { path: 'settings', element: <Settings /> },
     ],
   },
   {

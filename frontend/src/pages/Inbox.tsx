@@ -10,7 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../utils/cn';
 import type { Email } from '../types/api';
 
-export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important' | 'unread' }) {
+export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important' | 'unread' | 'followups' }) {
   const queryClient = useQueryClient();
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [draftText, setDraftText] = useState<string | null>(null);
@@ -21,6 +21,7 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
       let url = '/inbox';
       if (filterType === 'important') url += '?priority=high';
       if (filterType === 'unread') url += '?is_read=false';
+      if (filterType === 'followups') url += '?needs_reply=true';
       const { data } = await api.get<Email[]>(url);
       return data;
     },
@@ -51,7 +52,7 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
 
   const handleSelectEmail = (email: Email) => {
     setSelectedEmail(email);
-    setDraftText(null); 
+    setDraftText(null);
   };
 
   return (
@@ -59,12 +60,13 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 capitalize">
-            {filterType === 'all' ? 'Inbox' : filterType}
+            {filterType === 'all' ? 'Inbox' : filterType === 'followups' ? 'Follow-ups' : filterType}
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            {filterType === 'all' ? 'Your recent emails, analyzed by AI.' : 
-             filterType === 'important' ? 'Emails marked as high priority.' : 
-             'Emails you haven\'t read yet.'}
+            {filterType === 'all' && 'Your recent emails, analyzed by AI.'}
+            {filterType === 'important' && 'Emails marked as high priority.'}
+            {filterType === 'unread' && "Emails you haven't read yet."}
+            {filterType === 'followups' && 'Emails that require a reply from you.'}
           </p>
         </div>
         <Button 
@@ -86,7 +88,7 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
               <div className="p-8 text-center flex flex-col items-center">
                 <InboxIcon className="w-8 h-8 text-slate-300 mb-3" />
                 <p className="text-sm text-slate-500">No emails found.</p>
-                <p className="text-xs text-slate-400 mt-1">Click Sync to fetch from Gmail.</p>
+                <p className="text-xs text-slate-400 mt-1">Try clicking Sync.</p>
               </div>
             ) : (
               emails.map((email) => (

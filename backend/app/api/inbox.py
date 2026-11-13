@@ -14,15 +14,17 @@ async def list_emails(
     db: DbSession, 
     limit: int = 50,
     is_read: bool | None = None,
-    priority: str | None = None
+    priority: str | None = None,
+    needs_reply: bool | None = None
 ):
     query = select(Email).where(Email.user_id == current_user.id)
     
     if is_read is not None:
         query = query.where(Email.is_read == is_read)
-        
     if priority:
         query = query.where(Email.priority_label == priority)
+    if needs_reply is not None:
+        query = query.where(Email.needs_reply == needs_reply)
 
     query = query.order_by(Email.created_at.desc()).limit(limit)
     res = await db.execute(query)
