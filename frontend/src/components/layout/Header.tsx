@@ -7,17 +7,17 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
   return (
     <header className="h-16 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between px-4 md:px-6 flex-shrink-0 relative z-30">
-      <div className="flex items-center gap-4">
-        {/* Hamburger Button */}
+      <div className="flex items-center gap-3">
+        {/* Hamburger Button - Added type="button" and increased z-index */}
         <button 
+          type="button"
           onClick={onMenuClick} 
-          className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md dark:hover:bg-slate-800 relative z-50 cursor-pointer"
-          aria-label="Open menu"
+          className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-md dark:hover:bg-slate-800 relative z-50 cursor-pointer"
         >
           <Menu className="w-6 h-6" />
         </button>
         
-        <div className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[200px] md:max-w-none">
+        <div className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px] md:max-w-none">
           Welcome back, {user?.full_name || user?.email.split('@')[0]}
         </div>
       </div>
