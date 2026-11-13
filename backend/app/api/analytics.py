@@ -3,11 +3,13 @@ from sqlalchemy import select, func
 from app.api.deps import CurrentUser, DbSession
 from app.models.email import Email
 from datetime import datetime, timedelta, timezone
+from collections import Counter
 
 router = APIRouter()
 
 @router.get("/dashboard")
 async def get_dashboard_stats(current_user: CurrentUser, db: DbSession):
+    # 1. Base counts
     total_res = await db.execute(select(func.count(Email.id)).where(Email.user_id == current_user.id))
     total = total_res.scalar() or 0
 
@@ -17,6 +19,7 @@ async def get_dashboard_stats(current_user: CurrentUser, db: DbSession):
     high_res = await db.execute(select(func.count(Email.id)).where(Email.user_id == current_user.id, Email.priority_label == "high"))
     high_priority = high_res.scalar() or 0
 
+    # 2. Categories breakdown
     cat_res = await db.execute(
         select(Email.category, func.count(Email.id))
         .where(Email.user_id == current_user.id)
@@ -24,14 +27,16 @@ async def get_dashboard_stats(current_user: CurrentUser, db: DbSession):
     )
     categories = [{"name": cat or "Other", "value": count} for cat, count in cat_res.all()]
 
+    # 3. Timeline (Last 7 Days) - Grouped in Python for DB compatibility
     seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
     date_res = await db.execute(
-        select(func.date(Email.created_at), func.count(Email.id))
+        select(Email.created_at)
         .where(Email.user_id == current_user.id, Email.created_at >= seven_days_ago)
-        .group_by(func.date(Email.created_at))
-        .order_by(func.date(Email.created_at))
     )
-    timeline = [{"date": str(d), "count": c} for d, c in date_res.all()]
+    
+    dates = date_res.scalars().all()
+    date_counts = Counter([d.strftime("%Y-%m-%d") for d in dates if d])
+    timeline = [{"date": k, "count": v} for k, v in sorted(date_counts.items())]
 
     return {
         "total_emails": total,
