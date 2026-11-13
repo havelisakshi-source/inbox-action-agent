@@ -13,6 +13,9 @@ export function Analytics() {
 
   if (isLoading) return <div className="p-8 text-center text-slate-500">Loading analytics...</div>;
 
+  const categoriesList = Array.isArray(stats?.categories) ? stats.categories : [];
+  const timelineList = Array.isArray(stats?.timeline) ? stats.timeline : [];
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
@@ -21,14 +24,13 @@ export function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Email Categories */}
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Email Categories</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={stats?.categories || []}
+                  data={categoriesList}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -36,7 +38,7 @@ export function Analytics() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {(stats?.categories || []).map((entry, index) => (
+                  {categoriesList.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -45,7 +47,7 @@ export function Analytics() {
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap gap-4 mt-4 justify-center">
-            {(stats?.categories || []).map((entry, index) => (
+            {categoriesList.map((entry, index) => (
               <div key={entry.name} className="flex items-center gap-2 text-sm">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                 <span className="text-slate-600 dark:text-slate-400">{entry.name} ({entry.value})</span>
@@ -54,12 +56,11 @@ export function Analytics() {
           </div>
         </Card>
 
-        {/* Emails Over Time */}
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Emails (Last 7 Days)</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats?.timeline || []}>
+              <BarChart data={timelineList}>
                 <XAxis dataKey="date" stroke="#8884d8" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#8884d8" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip cursor={{ fill: 'transparent' }} />

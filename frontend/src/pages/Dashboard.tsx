@@ -21,7 +21,6 @@ export function Dashboard() {
     { label: 'High Priority', value: stats?.high_priority_emails || 0, icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-500/10' },
   ];
 
-  // Safely handle categories whether it's an array or object
   const categoriesList = Array.isArray(stats?.categories) ? stats.categories : [];
 
   return (

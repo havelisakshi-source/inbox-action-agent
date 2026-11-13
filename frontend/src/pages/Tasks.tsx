@@ -46,7 +46,7 @@ export function Tasks() {
                   )}
                 </div>
               </div>
-            </div> /* <-- FIXED: Changed this from </Card> to </div> */
+            </div>
           ))
         )}
       </Card>
