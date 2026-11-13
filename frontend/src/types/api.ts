@@ -25,9 +25,16 @@ export interface Email {
   is_starred: boolean;
   has_attachment: boolean;
   
-  // Add these AI fields:
   category: string | null;
   priority_score: number | null;
   priority_label: string | null;
   summary_short: string | null;
+}
+
+export interface DashboardStats {
+  total_emails: number;
+  unread_emails: number;
+  high_priority_emails: number;
+  categories: { name: string; value: number }[];
+  timeline: { date: string; count: number }[];
 }

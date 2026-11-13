@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inboxService } from '../services/inbox';
 import { actionsService } from '../services/actions';
+import { api } from '../services/api';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { RefreshCw, Inbox as InboxIcon, Paperclip, Sparkles, Wand2 } from 'lucide-react';
@@ -9,14 +10,20 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../utils/cn';
 import type { Email } from '../types/api';
 
-export function Inbox() {
+export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important' | 'unread' }) {
   const queryClient = useQueryClient();
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [draftText, setDraftText] = useState<string | null>(null);
 
   const { data: emails = [], isLoading } = useQuery({
-    queryKey: ['emails'],
-    queryFn: inboxService.getEmails,
+    queryKey: ['emails', filterType],
+    queryFn: async () => {
+      let url = '/inbox';
+      if (filterType === 'important') url += '?priority=high';
+      if (filterType === 'unread') url += '?is_read=false';
+      const { data } = await api.get<Email[]>(url);
+      return data;
+    },
   });
 
   const syncMutation = useMutation({
@@ -44,15 +51,21 @@ export function Inbox() {
 
   const handleSelectEmail = (email: Email) => {
     setSelectedEmail(email);
-    setDraftText(null);
+    setDraftText(null); 
   };
 
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Inbox</h1>
-          <p className="text-slate-500 text-sm mt-1">Your recent emails, analyzed by AI.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 capitalize">
+            {filterType === 'all' ? 'Inbox' : filterType}
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            {filterType === 'all' ? 'Your recent emails, analyzed by AI.' : 
+             filterType === 'important' ? 'Emails marked as high priority.' : 
+             'Emails you haven\'t read yet.'}
+          </p>
         </div>
         <Button 
           onClick={() => syncMutation.mutate()} 

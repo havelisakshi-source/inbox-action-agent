@@ -1,11 +1,5 @@
 import { api } from './api';
-
-export interface DashboardStats {
-  total_emails: number;
-  unread_emails: number;
-  high_priority_emails: number;
-  categories: Record<string, number>;
-}
+import type { DashboardStats } from '../types/api';
 
 export const analyticsService = {
   async getDashboardStats(): Promise<DashboardStats> {

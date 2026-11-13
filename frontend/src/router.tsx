@@ -5,8 +5,11 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Inbox } from './pages/Inbox';
+import { Important } from './pages/Important';
+import { Unread } from './pages/Unread';
+import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
-import { Assistant } from './pages/Assistant'; // <-- New Import
+import { Assistant } from './pages/Assistant';
 import { Placeholder } from './pages/Placeholder';
 
 export const router = createBrowserRouter([
@@ -16,13 +19,13 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'inbox', element: <Inbox /> },
-      { path: 'important', element: <Placeholder title="Important Emails" /> },
-      { path: 'unread', element: <Placeholder title="Unread Emails" /> },
+      { path: 'important', element: <Important /> },
+      { path: 'unread', element: <Unread /> },
       { path: 'followups', element: <Placeholder title="Follow-ups" /> },
-      { path: 'assistant', element: <Assistant /> }, // <-- Updated Route
+      { path: 'assistant', element: <Assistant /> },
       { path: 'actions', element: <Placeholder title="Action Center" /> },
       { path: 'tasks', element: <Placeholder title="Tasks & Deadlines" /> },
-      { path: 'analytics', element: <Placeholder title="Analytics" /> },
+      { path: 'analytics', element: <Analytics /> },
       { path: 'history', element: <Placeholder title="Activity History" /> },
       { path: 'settings', element: <Settings /> },
     ],

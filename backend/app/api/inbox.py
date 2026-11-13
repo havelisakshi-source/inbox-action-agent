@@ -9,13 +9,23 @@ from app.schemas.email import EmailResponse
 router = APIRouter()
 
 @router.get("", response_model=list[EmailResponse])
-async def list_emails(current_user: CurrentUser, db: DbSession, limit: int = 20):
-    res = await db.execute(
-        select(Email)
-        .where(Email.user_id == current_user.id)
-        .order_by(Email.created_at.desc()) # Changed from received_at
-        .limit(limit)
-    )
+async def list_emails(
+    current_user: CurrentUser, 
+    db: DbSession, 
+    limit: int = 50,
+    is_read: bool | None = None,
+    priority: str | None = None
+):
+    query = select(Email).where(Email.user_id == current_user.id)
+    
+    if is_read is not None:
+        query = query.where(Email.is_read == is_read)
+        
+    if priority:
+        query = query.where(Email.priority_label == priority)
+
+    query = query.order_by(Email.created_at.desc()).limit(limit)
+    res = await db.execute(query)
     return res.scalars().all()
 
 @router.post("/sync")
@@ -24,7 +34,6 @@ async def sync_emails(current_user: CurrentUser, db: DbSession):
         sync_service = GmailSyncService(db, current_user.id)
         sync_count = await sync_service.sync_recent_emails(limit=10)
         
-        # Try analyzing, but don't crash if it fails
         analyzed_count = 0
         try:
             ai_service = AIService(db)
