@@ -21,6 +21,9 @@ export function Dashboard() {
     { label: 'High Priority', value: stats?.high_priority_emails || 0, icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-500/10' },
   ];
 
+  // Safely handle categories whether it's an array or object
+  const categoriesList = Array.isArray(stats?.categories) ? stats.categories : [];
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
@@ -28,7 +31,6 @@ export function Dashboard() {
         <p className="text-slate-500 text-sm mt-1">Welcome back, {user?.full_name || 'User'}.</p>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {statCards.map((stat) => (
           <Card key={stat.label} className="p-6 flex items-center justify-between">
@@ -43,7 +45,6 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Category Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
@@ -51,27 +52,26 @@ export function Dashboard() {
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Inbox Breakdown</h3>
           </div>
           <div className="space-y-4">
-            {Object.entries(stats?.categories || {}).map(([category, count]) => (
-              <div key={category}>
+            {categoriesList.map((cat) => (
+              <div key={cat.name}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">{category}</span>
-                  <span className="text-slate-500">{count}</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{cat.name}</span>
+                  <span className="text-slate-500">{cat.value}</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
                   <div 
                     className="bg-brand-500 h-2 rounded-full" 
-                    style={{ width: `${(count / (stats?.total_emails || 1)) * 100}%` }}
+                    style={{ width: `${(cat.value / (stats?.total_emails || 1)) * 100}%` }}
                   />
                 </div>
               </div>
             ))}
-            {Object.keys(stats?.categories || {}).length === 0 && (
+            {categoriesList.length === 0 && (
               <p className="text-sm text-slate-500 text-center py-4">No emails analyzed yet.</p>
             )}
           </div>
         </Card>
 
-        {/* AI Insights */}
         <Card className="p-6 bg-gradient-to-br from-brand-50 to-white dark:from-slate-900 dark:to-slate-950 border-brand-100 dark:border-brand-900/50">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-brand-500" />

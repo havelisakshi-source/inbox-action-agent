@@ -11,6 +11,7 @@ import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { Assistant } from './pages/Assistant';
 import { Placeholder } from './pages/Placeholder';
+import { Tasks } from './pages/Tasks';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'analytics', element: <Analytics /> },
       { path: 'history', element: <Placeholder title="Activity History" /> },
       { path: 'settings', element: <Settings /> },
+      { path: 'tasks', element: <Tasks /> },
     ],
   },
   {
