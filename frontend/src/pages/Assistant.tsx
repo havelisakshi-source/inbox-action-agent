@@ -30,7 +30,6 @@ export function Assistant() {
 
   const handleSend = () => {
     if (!input.trim() || chatMutation.isPending) return;
-    
     const userMessage = input.trim();
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
@@ -42,17 +41,15 @@ export function Assistant() {
   }, [messages, chatMutation.isPending]);
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col space-y-4">
+    <div className="max-w-4xl mx-auto h-[calc(100vh-8rem)] md:h-[calc(100vh-9rem)] flex flex-col space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-brand-500" />
-          AI Assistant
+          <Sparkles className="w-6 h-6 text-brand-500" /> AI Assistant
         </h1>
-        <p className="text-slate-500 text-sm mt-1">Chat with your inbox using natural language.</p>
+        <p className="text-slate-500 text-sm mt-1 hidden md:block">Chat with your inbox using natural language.</p>
       </div>
 
       <Card className="flex-1 flex flex-col overflow-hidden">
-        {/* Chat History */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {messages.map((msg, idx) => (
             <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "")}>
@@ -63,16 +60,13 @@ export function Assistant() {
                 {msg.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
               </div>
               <div className={cn(
-                "px-4 py-3 rounded-2xl max-w-[80%] text-sm whitespace-pre-wrap",
-                msg.role === 'user' 
-                  ? "bg-brand-600 text-white rounded-tr-sm" 
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm"
+                "px-4 py-3 rounded-2xl max-w-[85%] md:max-w-[80%] text-sm whitespace-pre-wrap",
+                msg.role === 'user' ? "bg-brand-600 text-white rounded-tr-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm"
               )}>
                 {msg.content}
               </div>
             </div>
           ))}
-          
           {chatMutation.isPending && (
             <div className="flex gap-3">
               <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center flex-shrink-0">
@@ -88,12 +82,8 @@ export function Assistant() {
           <div ref={endOfMessagesRef} />
         </div>
 
-        {/* Input Area */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-          <form 
-            onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-            className="flex gap-2"
-          >
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2">
             <input
               type="text"
               value={input}
@@ -102,7 +92,7 @@ export function Assistant() {
               className="flex-1 h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               disabled={chatMutation.isPending}
             />
-            <Button type="submit" disabled={!input.trim() || chatMutation.isPending}>
+            <Button type="submit" disabled={!input.trim() || chatMutation.isPending} className="px-4">
               <Send className="w-4 h-4" />
             </Button>
           </form>

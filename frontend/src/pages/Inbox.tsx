@@ -5,7 +5,7 @@ import { actionsService } from '../services/actions';
 import { api } from '../services/api';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { RefreshCw, Inbox as InboxIcon, Paperclip, Sparkles, Wand2 } from 'lucide-react';
+import { RefreshCw, Inbox as InboxIcon, Paperclip, Sparkles, Wand2, ChevronLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../utils/cn';
 import type { Email } from '../types/api';
@@ -34,7 +34,6 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
       alert(`Sync complete! Synced ${data.synced} emails, analyzed ${data.analyzed}.`);
     },
     onError: (error: any) => {
-      console.error(error);
       alert(`Sync failed: ${error.response?.data?.detail || error.message}`);
     }
   });
@@ -45,7 +44,6 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
       setDraftText(data);
     },
     onError: (error: any) => {
-      console.error(error);
       alert(`Failed to generate draft: ${error.response?.data?.detail || error.message}`);
     }
   });
@@ -56,8 +54,8 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="h-[calc(100vh-8rem)] md:h-[calc(100vh-9rem)] flex flex-col space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 capitalize">
             {filterType === 'all' ? 'Inbox' : filterType === 'followups' ? 'Follow-ups' : filterType}
@@ -73,14 +71,19 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
           onClick={() => syncMutation.mutate()} 
           isLoading={syncMutation.isPending}
           variant="secondary"
+          className="w-full md:w-auto"
         >
           <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
-          {syncMutation.isPending ? 'Syncing & Analyzing...' : 'Sync Emails'}
+          {syncMutation.isPending ? 'Syncing...' : 'Sync Emails'}
         </Button>
       </div>
 
       <div className="flex-1 flex gap-4 min-h-0">
-        <Card className="w-1/3 flex flex-col overflow-hidden">
+        {/* List View */}
+        <Card className={cn(
+          "w-full md:w-1/3 flex-col overflow-hidden",
+          selectedEmail ? "hidden md:flex" : "flex"
+        )}>
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
             {isLoading ? (
               <div className="p-4 text-center text-sm text-slate-500">Loading...</div>
@@ -88,7 +91,6 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
               <div className="p-8 text-center flex flex-col items-center">
                 <InboxIcon className="w-8 h-8 text-slate-300 mb-3" />
                 <p className="text-sm text-slate-500">No emails found.</p>
-                <p className="text-xs text-slate-400 mt-1">Try clicking Sync.</p>
               </div>
             ) : (
               emails.map((email) => (
@@ -109,17 +111,12 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
                       {email.received_at ? formatDistanceToNow(new Date(email.received_at), { addSuffix: true }) : ''}
                     </span>
                   </div>
-                  
                   <div className={cn("text-sm truncate", !email.is_read ? "font-semibold text-slate-800 dark:text-slate-200" : "text-slate-600 dark:text-slate-400")}>
                     {email.subject || '(No Subject)'}
                   </div>
-                  
                   {email.summary_short && (
-                    <div className="text-xs text-slate-500 truncate mt-1">
-                      {email.summary_short}
-                    </div>
+                    <div className="text-xs text-slate-500 truncate mt-1">{email.summary_short}</div>
                   )}
-
                   <div className="flex items-center gap-2 mt-2">
                     {email.category && (
                       <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -136,7 +133,6 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
                         {email.priority_label}
                       </span>
                     )}
-                    {email.has_attachment && <Paperclip className="w-3 h-3 text-slate-400" />}
                   </div>
                 </button>
               ))
@@ -144,18 +140,31 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
           </div>
         </Card>
 
-        <Card className="flex-1 flex flex-col overflow-hidden">
+        {/* Detail View */}
+        <Card className={cn(
+          "w-full md:flex-1 flex-col overflow-hidden",
+          selectedEmail ? "flex" : "hidden md:flex"
+        )}>
           {selectedEmail ? (
-            <div className="p-6 flex flex-col h-full overflow-y-auto">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            <div className="p-4 md:p-6 flex flex-col h-full overflow-y-auto">
+              
+              {/* Mobile Back Button */}
+              <button 
+                onClick={() => setSelectedEmail(null)} 
+                className="md:hidden flex items-center text-sm font-medium text-slate-500 mb-4 hover:text-slate-800 dark:hover:text-slate-200"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" /> Back to Inbox
+              </button>
+
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100">
                   {selectedEmail.subject || '(No Subject)'}
                 </h2>
                 <Button 
                   onClick={() => draftMutation.mutate(selectedEmail.id)}
                   isLoading={draftMutation.isPending}
                   variant="secondary"
-                  className="whitespace-nowrap"
+                  className="w-full md:w-auto whitespace-nowrap"
                 >
                   <Wand2 className="w-4 h-4 mr-2" />
                   {draftMutation.isPending ? 'Drafting...' : 'Draft Reply'}
@@ -163,58 +172,47 @@ export function Inbox({ filterType = 'all' }: { filterType?: 'all' | 'important'
               </div>
 
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold">
+                <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold flex-shrink-0">
                   {(selectedEmail.sender_name?.[0] || selectedEmail.sender_email?.[0] || '?').toUpperCase()}
                 </div>
-                <div>
-                  <div className="font-medium text-slate-900 dark:text-slate-100">{selectedEmail.sender_name || 'Unknown'}</div>
-                  <div className="text-xs text-slate-500">{selectedEmail.sender_email}</div>
+                <div className="min-w-0">
+                  <div className="font-medium text-slate-900 dark:text-slate-100 truncate">{selectedEmail.sender_name || 'Unknown'}</div>
+                  <div className="text-xs text-slate-500 truncate">{selectedEmail.sender_email}</div>
                 </div>
               </div>
 
               {selectedEmail.summary_short && (
                 <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2 mb-2 text-brand-600 dark:text-brand-400 font-medium text-sm">
-                    <Sparkles className="w-4 h-4" />
-                    AI Summary
+                    <Sparkles className="w-4 h-4" /> AI Summary
                   </div>
-                  <p className="text-sm text-slate-700 dark:text-slate-300">
-                    {selectedEmail.summary_short}
-                  </p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">{selectedEmail.summary_short}</p>
                 </div>
               )}
 
-              <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
+              <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-sm md:text-base">
                 <p className="whitespace-pre-wrap leading-relaxed">{selectedEmail.snippet}</p>
-                <p className="text-sm text-slate-400 mt-8 italic">
-                  (Full email body fetching will be implemented in a future milestone)
-                </p>
               </div>
 
               {draftText && (
                 <div className="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-brand-100 dark:border-brand-500/20">
                   <div className="flex items-center gap-2 mb-3 text-brand-600 dark:text-brand-400 font-medium text-sm">
-                    <Sparkles className="w-4 h-4" />
-                    AI Generated Draft (Saved to Gmail Drafts)
+                    <Sparkles className="w-4 h-4" /> AI Generated Draft
                   </div>
                   <textarea
-                    className="w-full h-40 p-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-slate-100"
+                    className="w-full h-40 p-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
                     value={draftText}
                     onChange={(e) => setDraftText(e.target.value)}
                   />
-                  <div className="mt-3 flex justify-end gap-2">
-                    <Button variant="ghost" onClick={() => setDraftText(null)}>
-                      Discard
-                    </Button>
-                    <Button onClick={() => alert('Sending will be implemented in the next update')}>
-                      Send Email
-                    </Button>
+                  <div className="mt-3 flex flex-col md:flex-row justify-end gap-2">
+                    <Button variant="ghost" onClick={() => setDraftText(null)}>Discard</Button>
+                    <Button>Send Email</Button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
               <InboxIcon className="w-12 h-12 mb-4 opacity-20" />
               <p>Select an email to read</p>
             </div>
