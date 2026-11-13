@@ -1,8 +1,9 @@
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, Annotated
+import json
 
 from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict, NoDecode
 
 
 class Settings(BaseSettings):
@@ -18,7 +19,9 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     FRONTEND_URL: str = "http://localhost:5173"
     BACKEND_URL: str = "http://localhost:8000"
-    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+    
+    # NoDecode prevents Pydantic from trying to parse this as JSON automatically
+    CORS_ORIGINS: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
@@ -31,7 +34,8 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/auth/google/callback"
-    GMAIL_SCOPES: list[str] = [
+    
+    GMAIL_SCOPES: Annotated[list[str], NoDecode] = [
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/gmail.modify",
@@ -40,8 +44,9 @@ class Settings(BaseSettings):
 
     LLM_PROVIDER: Literal["groq", "openai"] = "groq"
     GROQ_API_KEY: str = ""
-    GROQ_MODEL_FAST: str = "llama-3.1-8b-instant"
-    GROQ_MODEL_REASONING: str = "llama-3.3-70b-versatile"
+    # Updated to active, working models
+    GROQ_MODEL_FAST: str = "openai/gpt-oss-20b"
+    GROQ_MODEL_REASONING: str = "openai/gpt-oss-120b"
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL_FAST: str = "gpt-4o-mini"
     OPENAI_MODEL_REASONING: str = "gpt-4o"
@@ -61,11 +66,18 @@ class Settings(BaseSettings):
     @classmethod
     def _parse_list(cls, v):
         if isinstance(v, str):
-            import json
-            try:
-                return json.loads(v)
-            except json.JSONDecodeError:
-                return [x.strip() for x in v.split(",") if x.strip()]
+            v = v.strip()
+            # If it's a wildcard
+            if v == "*":
+                return ["*"]
+            # If it's a JSON array string (like ["url1", "url2"])
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            # Otherwise, treat it as a comma-separated string (like "url1,url2")
+            return [x.strip() for x in v.split(",") if x.strip()]
         return v
 
 
